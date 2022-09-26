@@ -197,7 +197,7 @@ function via_socket_output($vars){
     }
     elseif($tab == "update"){
         //to change the url here.
-        $currentversion = file_get_contents("https://raw.github.com/rbaldasso/webhooks/master/version.txt");
+        $currentversion = file_get_contents("https://raw.github.com/rbaldasso/webhooks-whmcs/master/version.txt");
         echo '<div style="text-align: left;background-color: whiteSmoke;margin: 0px;padding: 10px;">';
         if($version != $currentversion){
             echo $LANG['newversion'];
