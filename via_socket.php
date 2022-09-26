@@ -14,9 +14,9 @@ if (!defined("WHMCS"))
 function via_socket_config() {
     $configarray = array(
         "name" => "Socket",
-        "description" => "WHMCS ViaSocket Addon. You can see details from: https://github.com/SameerRathod/via-socket-whmcs-module.git",
+        "description" => "Notificações Webhook",
         "version" => "1.1",
-        "author" => "Sameer Rathod",
+        "author" => "Rodrigo Baldasso",
 		"language" => "english",
     );
     return $configarray;
@@ -24,16 +24,16 @@ function via_socket_config() {
 
 function via_socket_activate() {
 
-    $query = "CREATE TABLE IF NOT EXISTS `mod_via_socket_logs` (`id` int(11) NOT NULL AUTO_INCREMENT,`event` varchar(40) NOT NULL,`text` text,`status` varchar(10) DEFAULT NULL,`errors` text,`logs` text,`datetime` datetime NOT NULL,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
+    $query = "CREATE TABLE IF NOT EXISTS `mod_webhooks_logs` (`id` int(11) NOT NULL AUTO_INCREMENT,`event` varchar(40) NOT NULL,`text` text,`status` varchar(10) DEFAULT NULL,`errors` text,`logs` text,`datetime` datetime NOT NULL,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
 	mysql_query($query);
 
-    $query = "CREATE TABLE `mod_via_socket_settings` ( `id` INT(11) NOT NULL AUTO_INCREMENT , `api` VARCHAR(512) NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;";
+    $query = "CREATE TABLE `mod_webhooks_settings` ( `id` INT(11) NOT NULL AUTO_INCREMENT , `api` VARCHAR(512) NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;";
     full_query($query);
 
-    $query = "INSERT INTO `mod_via_socket_settings` (`api`) VALUES ('');";
+    $query = "INSERT INTO `mod_webhooks_settings` (`api`) VALUES ('');";
     full_query($query);
 
-    $query = "CREATE TABLE IF NOT EXISTS `mod_via_socket_events` (`id` int(11) NOT NULL AUTO_INCREMENT,`name` varchar(50) CHARACTER SET utf8 NOT NULL,`type` enum('client','admin') CHARACTER SET utf8 NOT NULL,`admingsm` varchar(255) CHARACTER SET utf8 NOT NULL,`active` tinyint(1) NOT NULL,`extra` varchar(3) CHARACTER SET utf8 NOT NULL,`description` text CHARACTER SET utf8,PRIMARY KEY (`id`)) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;";
+    $query = "CREATE TABLE IF NOT EXISTS `mod_webhooks_events` (`id` int(11) NOT NULL AUTO_INCREMENT,`name` varchar(50) CHARACTER SET utf8 NOT NULL,`type` enum('client','admin') CHARACTER SET utf8 NOT NULL,`admingsm` varchar(255) CHARACTER SET utf8 NOT NULL,`active` tinyint(1) NOT NULL,`extra` varchar(3) CHARACTER SET utf8 NOT NULL,`description` text CHARACTER SET utf8,PRIMARY KEY (`id`)) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;";
 	mysql_query($query);
 
     //Creating hooks
@@ -41,7 +41,7 @@ function via_socket_activate() {
     $class = new Viasocket();
     $class->checkHooks();
 
-    return array('status'=>'success','description'=>'ViaSocket succesfully activated :)');
+    return array('status'=>'success','description'=>'Webhooks ativados com sucesso.');
 
 
 
@@ -49,14 +49,10 @@ function via_socket_activate() {
 
 function via_socket_deactivate() {
 
-    //$query = "DROP TABLE `mod_MSG91sms_templates`";
-	//mysql_query($query);
-    $query = "DROP TABLE `mod_via_socket_settings`";
+    $query = "DROP TABLE `mod_webhooks_settings`";
     full_query($query);
-    //$query = "DROP TABLE `mod_MSG91sms_messages`";
-    //mysql_query($query);
 
-    return array('status'=>'success','description'=>'Via Socket succesfully deactivated :(');
+    return array('status'=>'success','description'=>'Webhooks desativados.');
 }
 
 function via_socket_upgrade($vars) {
@@ -76,7 +72,7 @@ function via_socket_output($vars){
 	$modulelink = $vars['modulelink'];
 	$version = $vars['version'];
 	$LANG = $vars['_lang'];
-	putenv("TZ=Europe/Istanbul");
+	putenv("TZ=America/Sao_Paulo");
 
     $class = new Viasocket();
 
@@ -161,7 +157,7 @@ function via_socket_output($vars){
         <div class="vsocket">
         <div class="container">
 			<div class="up">
-				<h5 class="heading">Webhook Configuration</h5>
+				<h5 class="heading">Configurações do Webhook</h5>
 			<hr>
 			</div>
 				<div class="col-md-12">
@@ -172,11 +168,11 @@ function via_socket_output($vars){
 					    <div class="form-group col-md-6 row">
 					      <label class="heading" for="inputEmail4">webhook url</label>
 					      <input name="api" type="text" class="form-control" id="inputEmail4"
-								 placeholder="https://yourdomain.com/my-webhook" value="'. $settings['api'] .'">
+								 placeholder="https://<webhook>/<endpoint>" value="'. $settings['api'] .'">
 					    </div>
 					  </div>
 					  <div class="check">
-					  	<h5 class="heading">which notification do you want to receive?</h5>
+					  	<h5 class="heading">Qual notificação enviar?</h5>
 					  <hr class="semi">';
 					  while ($data = mysql_fetch_array($eventResults)) {
                           $temp = ($data["active"] == 1)?'checked=checked':'';
@@ -201,7 +197,7 @@ function via_socket_output($vars){
     }
     elseif($tab == "update"){
         //to change the url here.
-        $currentversion = file_get_contents("https://raw.github.com/SendOTP/viaSocket-Plugin/master/version.txt");
+        $currentversion = file_get_contents("https://raw.github.com/rbaldasso/webhooks/master/version.txt");
         echo '<div style="text-align: left;background-color: whiteSmoke;margin: 0px;padding: 10px;">';
         if($version != $currentversion){
             echo $LANG['newversion'];
