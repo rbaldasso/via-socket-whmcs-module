@@ -1,17 +1,29 @@
 <?php
-
+/*
+ *
+ * JetCSFManager @ whmcs module package
+ * Created By Idan Ben-Ezra
+ *
+ * Copyrights @ Jetserver Web Hosting
+ * http://jetserver.net
+ *
+ **/
 if (!defined("WHMCS"))
 	die("This file cannot be accessed directly");
 
-function via_socket_config() {
-    $configarray = array(
-        "name" => "Socket",
-        "description" => "Notificações Webhook",
-        "version" => "1.1",
-        "author" => "Rodrigo Baldasso",
-		"language" => "english",
-    );
-    return $configarray;
+define('WEBHOOKS', true);
+if(!defined('WEBHOOKS_ROOT_PATH'))  define('WEBHOOKS_ROOT_PATH', dirname(__FILE__));
+if(!defined('WHMCS_ROOT_PATH')) define('WHMCS_ROOT_PATH', realpath(WEBHOOKS_ROOT_PATH . '/../'));
+	
+function webhooks_config() 
+{
+	return array(
+		'name' 		=> 'Webhooks manager',
+		'description' 	=> 'Send webhooks from WHMCS to external systems',
+		'version' 	=> '1.0',
+		'author' 	=> 'LOOPHOST',
+		'language' 	=> 'english',
+	);
 }
 
 function webhooks_activate() {
@@ -39,7 +51,7 @@ function webhooks_activate() {
 
 }
 
-function via_socket_deactivate() {
+function webhooks_deactivate() {
 
     $query = "DROP TABLE `mod_webhooks_settings`";
     full_query($query);
@@ -47,7 +59,7 @@ function via_socket_deactivate() {
     return array('status'=>'success','description'=>'Webhooks desativados.');
 }
 
-function via_socket_upgrade($vars) {
+function webhooks_upgrade($vars) {
     $version = $vars['version'];
 
     switch($version){
@@ -56,11 +68,11 @@ function via_socket_upgrade($vars) {
 
     }
 
-    $class = new Viasocket();
+    $class = new Webhooks();
     $class->checkHooks();
 }
 
-function via_socket_output($vars){
+function webhooks_output($vars){
 	$modulelink = $vars['modulelink'];
 	$version = $vars['version'];
 	$LANG = $vars['_lang'];
@@ -123,7 +135,7 @@ function via_socket_output($vars){
             $update = array(
                 "api" => $_POST['api']
             );
-            update_query("mod_via_socket_settings", $update, "");
+            update_query("mod_webhooks_settings", $update, "");
 
             if ($_POST['evnt']) {
                 $class->updateEvents($_POST['evnt']);

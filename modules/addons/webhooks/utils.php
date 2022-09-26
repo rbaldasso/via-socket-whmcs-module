@@ -8,7 +8,7 @@
  * Licence: GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt)
  * */
 
-class Viasocket
+class Webhooks
 {
     var $sender;
     var $errors = array();
